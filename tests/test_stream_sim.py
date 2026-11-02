@@ -89,3 +89,12 @@ def test_cli_stream_sim_per_line(tmp_path: Path, capsys):
 @pytest.mark.usefixtures('_patched')
 def test_cli_stream_sim_requires_input(capsys):
     assert cli.main(['stream-sim']) == 2
+
+
+@pytest.mark.usefixtures('_patched')
+def test_cli_per_line_total_shows_dash_when_decode_stream_skipped(tmp_path: Path, capsys):
+    f = tmp_path / 's.txt'
+    f.write_text('한a\n', encoding='utf-8')
+    assert cli.main(['stream-sim', '--file', str(f), '--per-line']) == 0
+    total = [ln for ln in capsys.readouterr().out.splitlines() if ln.startswith('TOTAL')][0]
+    assert total.split()[-1] == '-'
