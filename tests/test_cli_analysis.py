@@ -4,12 +4,15 @@ from pathlib import Path
 import pytest
 
 from glm_ko_tok import cli
-from glm_ko_tok.loader import TokenizerNotFoundError
+from glm_ko_tok.loader import LoadedModel, TokenizerNotFoundError
+from glm_ko_tok.models import MODELS
 
 
 @pytest.fixture(autouse=True)
 def _patch_loader(fake_tk, monkeypatch):
-    monkeypatch.setattr(cli, 'load_tokenizer', lambda _d: fake_tk)
+    monkeypatch.setattr(
+        cli, 'load_model', lambda key, _r: LoadedModel(MODELS[key], fake_tk, Path('nowhere'))
+    )
 
 
 def test_analyze_text(capsys):
@@ -51,17 +54,36 @@ def test_coverage_text(capsys):
     assert 'KS X 1001' in capsys.readouterr().out
 
 
-def test_fetch_command(monkeypatch, tmp_path: Path, capsys):
-    monkeypatch.setattr(cli, 'fetch_tokenizer', lambda repo, d: [Path(d) / repo])
-    assert cli.main(['fetch', '--repo', 'x/y', '--dir', str(tmp_path)]) == 0
-    assert 'x/y' in capsys.readouterr().out
+def test_fetch_command_single_and_all(monkeypatch, tmp_path: Path, capsys):
+    monkeypatch.setattr(cli, 'fetch_model', lambda spec, root: [Path(root) / spec.key / 'f'])
+    assert cli.main(['fetch', '--root', str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert 'glm-5.3:' in out
+    assert 'kimi-k3' not in out
+    assert cli.main(['fetch', '--model', 'all', '--root', str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert all(f'{k}:' in out for k in MODELS)
+
+
+def test_unknown_model_is_an_error(capsys):
+    assert cli.main(['coverage', '--model', 'nope']) == 2
+    assert 'unknown model' in capsys.readouterr().err
+
+
+def test_multi_model_headers_and_json(capsys):
+    assert cli.main(['coverage', '--model', 'glm-5.3', '--model', 'kimi-k3']) == 0
+    out = capsys.readouterr().out
+    assert '== glm-5.3 ==' in out
+    assert '== kimi-k3 ==' in out
+    assert cli.main(['analyze', '한a', '--model', 'all', '--json']) == 0
+    assert set(json.loads(capsys.readouterr().out)) == set(MODELS)
 
 
 def test_missing_tokenizer_message(monkeypatch, capsys):
-    def boom(_d):
+    def boom(_k, _r):
         msg = 'run glm-ko-tok fetch'
         raise TokenizerNotFoundError(msg)
 
-    monkeypatch.setattr(cli, 'load_tokenizer', boom)
+    monkeypatch.setattr(cli, 'load_model', boom)
     assert cli.main(['analyze', 'a']) == 1
     assert 'glm-ko-tok fetch' in capsys.readouterr().err

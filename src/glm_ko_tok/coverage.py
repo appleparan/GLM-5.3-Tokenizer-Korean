@@ -5,8 +5,7 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Any
 
-from glm_ko_tok.bytes_map import token_bytes
-from glm_ko_tok.protocols import TokenizerLike
+from glm_ko_tok.protocols import TokenBackend
 
 HANGUL_START = 0xAC00
 HANGUL_END = 0xD7A3
@@ -102,23 +101,19 @@ def _set_dict(s: SetCoverage) -> dict[str, Any]:
     }
 
 
-def vocab_syllables(tokenizer: TokenizerLike) -> set[str]:
+def vocab_syllables(backend: TokenBackend) -> set[str]:
     """Collect Hangul syllables found inside any vocab token's decoded bytes."""
     found: set[str] = set()
-    for token in tokenizer.get_vocab():
-        try:
-            data = token_bytes(token)
-        except ValueError:
-            continue
+    for data in backend.iter_vocab_bytes():
         text = data.decode('utf-8', errors='ignore')
         found.update(c for c in text if HANGUL_START <= ord(c) <= HANGUL_END)
     return found
 
 
-def _coverage(tokenizer: TokenizerLike, syllables: list[str], in_vocab: set[str]) -> SetCoverage:
+def _coverage(backend: TokenBackend, syllables: list[str], in_vocab: set[str]) -> SetCoverage:
     counts: Counter[int] = Counter()
     for s in syllables:
-        n = len(tokenizer.encode(s, add_special_tokens=False).ids)
+        n = len(backend.encode(s))
         counts[min(n, 4)] += 1
     return SetCoverage(
         total=len(syllables),
@@ -128,17 +123,17 @@ def _coverage(tokenizer: TokenizerLike, syllables: list[str], in_vocab: set[str]
     )
 
 
-def compute_coverage(tokenizer: TokenizerLike) -> CoverageResult:
+def compute_coverage(backend: TokenBackend) -> CoverageResult:
     """Compute syllable coverage for a tokenizer.
 
     Args:
-        tokenizer: Object with `encode`, `get_vocab`.
+        backend: Tokenizer backend.
 
     Returns:
         Coverage for all syllables and for KS X 1001.
     """
-    in_vocab = vocab_syllables(tokenizer)
+    in_vocab = vocab_syllables(backend)
     return CoverageResult(
-        all=_coverage(tokenizer, hangul_syllables(), in_vocab),
-        ks=_coverage(tokenizer, ksx1001_syllables(), in_vocab),
+        all=_coverage(backend, hangul_syllables(), in_vocab),
+        ks=_coverage(backend, ksx1001_syllables(), in_vocab),
     )

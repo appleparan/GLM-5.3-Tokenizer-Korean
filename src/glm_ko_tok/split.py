@@ -4,9 +4,9 @@ import json
 from dataclasses import asdict, dataclass
 from itertools import pairwise
 
-from glm_ko_tok.bytes_map import token_bytes
+from glm_ko_tok.bytes_map import bytes_to_unicode
 from glm_ko_tok.coverage import HANGUL_END, HANGUL_START
-from glm_ko_tok.protocols import TokenizerLike
+from glm_ko_tok.protocols import TokenBackend
 
 
 @dataclass(frozen=True)
@@ -79,25 +79,27 @@ def _valid(data: bytes) -> bool:
     return True
 
 
-def analyze_text(tokenizer: TokenizerLike, text: str) -> Analysis:
+def analyze_text(backend: TokenBackend, text: str) -> Analysis:
     """Analyze how a text splits into tokens and bytes.
 
     Args:
-        tokenizer: Object with `encode` and `decode`.
+        backend: Tokenizer backend.
         text: Text to analyze.
 
     Returns:
         Per-token info and a summary.
     """
-    enc = tokenizer.encode(text, add_special_tokens=False)
-    chunks = [token_bytes(t) for t in enc.tokens]
+    ids = backend.encode(text)
+    table = bytes_to_unicode()
+    chunks = [backend.token_bytes(i) for i in ids]
+    names = [''.join(table[b] for b in c) for c in chunks]
     full = b''.join(chunks)
     starts = [i for i, b in enumerate(full) if not _is_cont(b)]
     start_set = set(starts)
     owner = [i for i, c in enumerate(chunks) for _ in c]
     infos = []
     pos = 0
-    for tid, tok, data in zip(enc.ids, enc.tokens, chunks, strict=True):
+    for tid, tok, data in zip(ids, names, chunks, strict=True):
         end = pos + len(data)
         infos.append(
             TokenInfo(
@@ -107,7 +109,7 @@ def analyze_text(tokenizer: TokenizerLike, text: str) -> Analysis:
                 valid_alone=_valid(data),
                 starts_mid_char=pos not in start_set,
                 ends_mid_char=end < len(full) and end not in start_set,
-                naive_decode=tokenizer.decode([tid]),
+                naive_decode=backend.decode([tid]),
             )
         )
         pos = end
