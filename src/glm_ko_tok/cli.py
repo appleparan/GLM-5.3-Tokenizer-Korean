@@ -2,9 +2,11 @@
 
 import argparse
 import logging
+import os
 from collections.abc import Sequence
 from pathlib import Path
 
+from glm_ko_tok import probe
 from glm_ko_tok.coverage import compute_coverage
 from glm_ko_tok.fetch import DEFAULT_REPO, fetch_tokenizer
 from glm_ko_tok.loader import DEFAULT_DIR, TokenizerNotFoundError, load_tokenizer
@@ -41,7 +43,47 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser('stream-sim', help='simulate streaming decode')
     _add_input_args(p)
     p.add_argument('--json', action='store_true')
+    _add_probe_parser(sub)
     return parser
+
+
+def _add_probe_parser(sub: argparse._SubParsersAction) -> None:
+    p = sub.add_parser('probe', help='probe a streaming OpenAI-compatible endpoint')
+    p.add_argument('--target', choices=['vllm', 'openrouter'], default='vllm')
+    p.add_argument('--api', choices=['chat', 'responses'], default='chat')
+    p.add_argument('--base-url', help='overrides the target preset')
+    p.add_argument('--model', required=True)
+    p.add_argument('--prompt', required=True)
+    p.add_argument('--api-key-env', help='env var holding the API key (overrides preset)')
+    p.add_argument('--out', help='JSONL output path, e.g. runs/x.jsonl')
+    p.add_argument('--max-tokens', type=int, default=256)
+    p.add_argument('--provider', action='append', default=[], help='pin upstream (repeatable)')
+
+
+def _cmd_probe(args: argparse.Namespace) -> int:
+    try:
+        config = probe.build_config(
+            target=args.target,
+            model=args.model,
+            prompt=args.prompt,
+            env=os.environ,
+            base_url=args.base_url,
+            api_key_env=args.api_key_env,
+            api=args.api,
+            max_tokens=args.max_tokens,
+            providers=args.provider,
+        )
+        result = probe.run_probe(config, out=args.out)
+    except probe.ProbeConfigError as e:
+        write_err(f'error: {e}')
+        return 2
+    except probe.ProbeError as e:
+        write_err(f'error: {e}')
+        return 1
+    write(result.format())
+    if args.out:
+        write(f'saved: {args.out}')
+    return 0
 
 
 def collect_inputs(args: argparse.Namespace) -> list[str] | None:
@@ -145,6 +187,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return 0
     if args.command == 'analyze':
         return _cmd_analyze(args)
+    if args.command == 'probe':
+        return _cmd_probe(args)
     if args.command == 'stream-sim':
         return _cmd_stream_sim(args)
     msg = f'unknown command: {args.command}'
