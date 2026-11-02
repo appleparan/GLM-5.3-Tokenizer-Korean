@@ -28,6 +28,9 @@ dev = [
     "ruff",
     "ty",
 ]
+verify = [
+    "transformers>=5.20.2",
+]
 
 [tool.ruff]
 line-length = 100
