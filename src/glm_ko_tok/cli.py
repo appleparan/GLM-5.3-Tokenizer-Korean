@@ -8,11 +8,12 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from glm_ko_tok import probe
-from glm_ko_tok.compare import CompareResult, compare_backend
+from glm_ko_tok.compare import DEFAULT_KOREAN_FILE, DEFAULT_PARALLEL_FILE, compare_models
 from glm_ko_tok.coverage import compute_coverage
 from glm_ko_tok.fetch import fetch_model
 from glm_ko_tok.loader import DEFAULT_ROOT, LoadedModel, TokenizerNotFoundError, load_model
 from glm_ko_tok.models import MODELS, UnknownModelError, resolve_keys
+from glm_ko_tok.sample_stats import SampleFormatError
 from glm_ko_tok.split import Analysis, analyze_text
 from glm_ko_tok.stream_sim import StreamReport, simulate_stream
 from glm_ko_tok.textio import read_cases, shorten, write, write_err
@@ -58,6 +59,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser('compare', help='token cost of Hangul vs Hanja vs Chinese')
     _add_model_args(p)
+    p.add_argument('--korean-file', default=str(DEFAULT_KOREAN_FILE))
+    p.add_argument('--parallel-file', default=str(DEFAULT_PARALLEL_FILE))
     p.add_argument('--json', action='store_true')
     _add_probe_parser(sub)
     return parser
@@ -231,7 +234,9 @@ def _dispatch(args: argparse.Namespace) -> int:
     if args.command == 'analyze':
         return _cmd_analyze(args)
     if args.command == 'compare':
-        result = CompareResult([compare_backend(m.spec.key, m.backend) for m in _load_models(args)])
+        result = compare_models(
+            _load_models(args), Path(args.korean_file), Path(args.parallel_file)
+        )
         write(result.to_json() if args.json else result.format())
         return 0
     if args.command == 'probe':
@@ -255,7 +260,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.WARNING)
     try:
         return _dispatch(args)
-    except UnknownModelError as e:
+    except (UnknownModelError, SampleFormatError) as e:
         write_err(f'error: {e}')
         return 2
     except TokenizerNotFoundError as e:

@@ -4,7 +4,13 @@ from pathlib import Path
 import pytest
 
 from glm_ko_tok import cli
-from glm_ko_tok.compare import CompareResult, char_sets, compare_backend, vocab_composition
+from glm_ko_tok.compare import (
+    CompareResult,
+    char_sets,
+    compare_backend,
+    compare_models,
+    vocab_composition,
+)
 from glm_ko_tok.loader import LoadedModel
 from glm_ko_tok.models import MODELS
 
@@ -73,3 +79,67 @@ def test_compare_real(real_tk):
     gb = by['Chinese GB2312 L1'].by_count
     assert (gb[1], gb[2]) == (3483, 272)
     assert (r.vocab.with_hangul, r.vocab.with_han, r.vocab.invalid_alone) == (565, 28642, 1095)
+
+
+def _fake_models(fake_tk, tmp_path: Path) -> list[LoadedModel]:
+    (tmp_path / 'tokenizer.json').write_text(
+        json.dumps({'pre_tokenizer': {'type': 'Split', 'pattern': {'Regex': r'\p{N}'}}})
+    )
+    return [
+        LoadedModel(MODELS['glm-5.3'], fake_tk, tmp_path),
+        LoadedModel(MODELS['kimi-k3'], fake_tk, tmp_path),
+    ]
+
+
+def test_compare_models_reports_samples_and_pretokenizer(fake_tk, tmp_path: Path):
+    ko = tmp_path / 'ko.txt'
+    ko.write_text('# c\n한a\n', encoding='utf-8')
+    pa = tmp_path / 'pa.txt'
+    pa.write_text('국\t국a\n', encoding='utf-8')
+    result = compare_models(_fake_models(fake_tk, tmp_path), ko, pa)
+    glm, kimi = result.models
+    assert glm.korean is not None
+    assert glm.parallel is not None
+    assert glm.pretokenizer is not None
+    assert kimi.pretokenizer is not None
+    assert glm.korean.total_tokens == 3
+    assert glm.parallel.pairs == 1
+    assert glm.pretokenizer.patterns == [r'\p{N}']
+    assert not glm.pretokenizer.explicit_han
+    assert kimi.pretokenizer.explicit_han
+    text = result.format()
+    assert 'Korean sample (1 lines)' in text
+    assert 'Parallel ko/zh (1 pairs)' in text
+    assert 'explicit Han range/class: yes' in text
+    assert 'Hangul range: no' in text
+    data = json.loads(result.to_json())
+    assert data['kimi-k3']['pretokenizer']['explicit_han'] is True
+    assert data['glm-5.3']['korean']['naive_fffd'] == 3
+    assert data['glm-5.3']['parallel']['per_pair'][0]['ko'] == '국'
+
+
+def test_compare_models_without_sample_files(fake_tk, tmp_path: Path):
+    models = _fake_models(fake_tk, tmp_path)[:1]
+    result = compare_models(models, tmp_path / 'no1', tmp_path / 'no2')
+    assert result.models[0].korean is None
+    assert result.models[0].parallel is None
+    assert 'Korean sample' not in result.format()
+
+
+def test_cli_compare_bad_parallel_file_is_an_error(fake_tk, monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(
+        cli, 'load_model', lambda key, _r: LoadedModel(MODELS[key], fake_tk, tmp_path)
+    )
+    bad = tmp_path / 'bad.txt'
+    bad.write_text('no tab here\n', encoding='utf-8')
+    assert cli.main(['compare', '--parallel-file', str(bad)]) == 2
+    assert 'must be' in capsys.readouterr().err
+
+
+def test_format_escapes_control_chars_in_patterns(fake_tk, tmp_path: Path):
+    (tmp_path / 'tokenizer.json').write_text(
+        json.dumps({'pre_tokenizer': {'type': 'Split', 'pattern': {'Regex': 'a\r\nb'}}})
+    )
+    model = LoadedModel(MODELS['glm-5.3'], fake_tk, tmp_path)
+    text = compare_models([model], None, None).format()
+    assert '[1] a\\r\\nb' in text
