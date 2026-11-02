@@ -96,5 +96,5 @@ def test_cli_per_line_total_shows_dash_when_decode_stream_skipped(tmp_path: Path
     f = tmp_path / 's.txt'
     f.write_text('한a\n', encoding='utf-8')
     assert cli.main(['stream-sim', '--file', str(f), '--per-line']) == 0
-    total = [ln for ln in capsys.readouterr().out.splitlines() if ln.startswith('TOTAL')][0]
+    total = next(ln for ln in capsys.readouterr().out.splitlines() if ln.startswith('TOTAL'))
     assert total.split()[-1] == '-'
