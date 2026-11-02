@@ -6,6 +6,7 @@ Most Hangul syllables are 3 UTF-8 bytes and are split across several tokens. A c
 decodes each token alone prints U+FFFD.
 
 Analysis (Korean, with diagrams): [docs/hangul-vs-han-tokenization.md](docs/hangul-vs-han-tokenization.md).
+Test report for OpenRouter and omp runs (Korean): [docs/omp-openrouter-probe-report.md](docs/omp-openrouter-probe-report.md).
 
 ## Models
 
