@@ -173,9 +173,12 @@ def _stream_table(rows: list[StreamReport]) -> str:
             f'{int(r[2].equals_truth) if ds_ok else "-":>5}  {shorten(rep.text)}'
         )
     n = len(rows)
+    skipped = all(rep.results[2].skipped for rep in rows)
+    ds_total = '-' if skipped else totals[2]
+    ds_eq = '-' if skipped else f'{eq[2]}/{n}'
     lines.append(
-        f'{"TOTAL":>3} {totals[0]:>6} {totals[1]:>5} {totals[2]:>7} '
-        f'{eq[0]}/{n:<4} {eq[1]}/{n:<3} {eq[2]}/{n}'
+        f'{"TOTAL":>3} {totals[0]:>6} {totals[1]:>5} {ds_total:>7} '
+        f'{eq[0]}/{n:<4} {eq[1]}/{n:<3} {ds_eq}'
     )
     return '\n'.join(lines)
 
