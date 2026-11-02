@@ -4,11 +4,10 @@ import codecs
 import json
 from dataclasses import asdict, dataclass
 
-from tokenizers import Tokenizer
 from tokenizers.decoders import DecodeStream
 
-from glm_ko_tok.bytes_map import token_bytes
-from glm_ko_tok.protocols import TokenizerLike
+from glm_ko_tok.backend_hf import HFBackend
+from glm_ko_tok.protocols import TokenBackend
 
 FFFD = '�'
 
@@ -63,41 +62,45 @@ def _result(name: str, output: str, truth: str) -> StreamResult:
     )
 
 
-def _naive(tk: TokenizerLike, ids: list[int]) -> str:
-    return ''.join(tk.decode([i]) for i in ids)
+def _naive(backend: TokenBackend, ids: list[int]) -> str:
+    return ''.join(backend.decode([i]) for i in ids)
 
 
-def _incremental(tk: TokenizerLike, ids: list[int]) -> str:
+def _incremental(backend: TokenBackend, ids: list[int]) -> str:
     dec = codecs.getincrementaldecoder('utf-8')('replace')
-    parts = [dec.decode(token_bytes(tk.id_to_token(i) or '')) for i in ids]
+    parts = [dec.decode(backend.token_bytes(i)) for i in ids]
     parts.append(dec.decode(b'', final=True))
     return ''.join(parts)
 
 
-def _decode_stream(tk: TokenizerLike, ids: list[int]) -> str | None:
-    if not isinstance(tk, Tokenizer):
+def _decode_stream(backend: TokenBackend, ids: list[int]) -> str | None:
+    if not isinstance(backend, HFBackend):
         return None
     stream = DecodeStream(skip_special_tokens=False)
-    return ''.join(chunk for i in ids if (chunk := stream.step(tk, i)) is not None)
+    return ''.join(chunk for i in ids if (chunk := stream.step(backend.tokenizer, i)) is not None)
 
 
-def simulate_stream(tk: TokenizerLike, text: str) -> StreamReport:
+def simulate_stream(backend: TokenBackend, text: str) -> StreamReport:
     """Simulate streaming `text` token by token three ways.
 
+    Naive decoding decodes each token's bytes alone (invalid UTF-8 becomes U+FFFD).
+    Incremental decoding feeds token bytes to a UTF-8 incremental decoder.
+    `DecodeStream` is available for `tokenizers` backends only.
+
     Args:
-        tk: Tokenizer.
+        backend: Tokenizer backend.
         text: Text to encode and replay.
 
     Returns:
         Report comparing naive, incremental, and DecodeStream output to the true decode.
     """
-    ids = tk.encode(text, add_special_tokens=False).ids
-    truth = tk.decode(ids)
+    ids = backend.encode(text)
+    truth = backend.decode(ids)
     results = [
-        _result('naive', _naive(tk, ids), truth),
-        _result('incremental', _incremental(tk, ids), truth),
+        _result('naive', _naive(backend, ids), truth),
+        _result('incremental', _incremental(backend, ids), truth),
     ]
-    ds = _decode_stream(tk, ids)
+    ds = _decode_stream(backend, ids)
     if ds is not None:
         results.append(_result('decode_stream', ds, truth))
     else:
@@ -109,7 +112,7 @@ def simulate_stream(tk: TokenizerLike, text: str) -> StreamReport:
                 equals_truth=False,
                 lossy=False,
                 skipped=True,
-                note='needs a real tokenizers.Tokenizer',
+                note='only for tokenizers (HF) backends',
             )
         )
     return StreamReport(text=text, truth=truth, results=results)

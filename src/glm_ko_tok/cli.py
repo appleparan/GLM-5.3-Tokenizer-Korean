@@ -1,26 +1,38 @@
 """Command line entry point for glm-ko-tok."""
 
 import argparse
+import json
 import logging
 import os
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 
 from glm_ko_tok import probe
-from glm_ko_tok.compare import compare_tokenizer
+from glm_ko_tok.compare import CompareResult, compare_backend
 from glm_ko_tok.coverage import compute_coverage
-from glm_ko_tok.fetch import DEFAULT_REPO, fetch_tokenizer
-from glm_ko_tok.loader import DEFAULT_DIR, TokenizerNotFoundError, load_tokenizer
+from glm_ko_tok.fetch import fetch_model
+from glm_ko_tok.loader import DEFAULT_ROOT, LoadedModel, TokenizerNotFoundError, load_model
+from glm_ko_tok.models import MODELS, UnknownModelError, resolve_keys
 from glm_ko_tok.split import Analysis, analyze_text
 from glm_ko_tok.stream_sim import StreamReport, simulate_stream
 from glm_ko_tok.textio import read_cases, shorten, write, write_err
+
+
+def _add_model_args(p: argparse.ArgumentParser) -> None:
+    p.add_argument(
+        '--model',
+        action='append',
+        metavar='KEY',
+        help=f'model key (repeatable) or "all"; keys: {", ".join(MODELS)} (default glm-5.3)',
+    )
+    p.add_argument('--root', default=str(DEFAULT_ROOT), help='directory with one folder per model')
 
 
 def _add_input_args(p: argparse.ArgumentParser) -> None:
     p.add_argument('text', nargs='?', help='text to process')
     p.add_argument('--file', help='read cases from a file')
     p.add_argument('--per-line', action='store_true', help='one case per line, print a table')
-    p.add_argument('--dir', default=str(DEFAULT_DIR), help='tokenizer directory')
+    _add_model_args(p)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -29,12 +41,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument('-v', '--verbose', action='store_true')
     sub = parser.add_subparsers(dest='command', required=True)
 
-    p = sub.add_parser('fetch', help='download tokenizer files')
-    p.add_argument('--repo', default=DEFAULT_REPO)
-    p.add_argument('--dir', default=str(DEFAULT_DIR))
+    p = sub.add_parser('fetch', help='download tokenizer files at the pinned revision')
+    _add_model_args(p)
 
     p = sub.add_parser('coverage', help='Hangul syllable coverage')
-    p.add_argument('--dir', default=str(DEFAULT_DIR))
+    _add_model_args(p)
     p.add_argument('--json', action='store_true')
 
     p = sub.add_parser('analyze', help='per-token byte split report')
@@ -44,8 +55,9 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser('stream-sim', help='simulate streaming decode')
     _add_input_args(p)
     p.add_argument('--json', action='store_true')
+
     p = sub.add_parser('compare', help='token cost of Hangul vs Hanja vs Chinese')
-    p.add_argument('--dir', default=str(DEFAULT_DIR))
+    _add_model_args(p)
     p.add_argument('--json', action='store_true')
     _add_probe_parser(sub)
     return parser
@@ -126,13 +138,14 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     if inputs is None:
         write_err('analyze: give TEXT or --file PATH')
         return 2
-    tk = load_tokenizer(args.dir)
+    models = _load_models(args)
     if args.per_line:
-        rows = [(t, analyze_text(tk, t)) for t in inputs]
-        write(_analysis_table(rows))
+        _emit(models, lambda m: _analysis_table([(t, analyze_text(m.backend, t)) for t in inputs]))
         return 0
-    result = analyze_text(tk, inputs[0])
-    write(result.to_json() if args.json else result.format())
+    if args.json:
+        _emit_json(models, lambda m: analyze_text(m.backend, inputs[0]).to_json())
+    else:
+        _emit(models, lambda m: analyze_text(m.backend, inputs[0]).format())
     return 0
 
 
@@ -169,30 +182,56 @@ def _cmd_stream_sim(args: argparse.Namespace) -> int:
     if inputs is None:
         write_err('stream-sim: give TEXT or --file PATH')
         return 2
-    tk = load_tokenizer(args.dir)
-    reports = [simulate_stream(tk, t) for t in inputs]
+    models = _load_models(args)
     if args.per_line:
-        write(_stream_table(reports))
+        _emit(models, lambda m: _stream_table([simulate_stream(m.backend, t) for t in inputs]))
     elif args.json:
-        write(reports[0].to_json())
+        _emit_json(models, lambda m: simulate_stream(m.backend, inputs[0]).to_json())
     else:
-        write(reports[0].format())
+        _emit(models, lambda m: simulate_stream(m.backend, inputs[0]).format())
+    return 0
+
+
+def _load_models(args: argparse.Namespace) -> list[LoadedModel]:
+    return [load_model(k, args.root) for k in resolve_keys(args.model)]
+
+
+def _emit(models: list[LoadedModel], render: Callable[[LoadedModel], str]) -> None:
+    """Print one report; with several models, a `== key ==` header before each."""
+    for m in models:
+        write(render(m) if len(models) == 1 else f'== {m.spec.key} ==\n{render(m)}\n')
+
+
+def _emit_json(models: list[LoadedModel], render: Callable[[LoadedModel], str]) -> None:
+    """Print JSON; with several models, an object keyed by model key."""
+    if len(models) == 1:
+        write(render(models[0]))
+        return
+    data = {m.spec.key: json.loads(render(m)) for m in models}
+    write(json.dumps(data, ensure_ascii=False, indent=2))
+
+
+def _cmd_fetch(args: argparse.Namespace) -> int:
+    for key in resolve_keys(args.model):
+        for path in fetch_model(MODELS[key], args.root):
+            write(f'{key}: {path}')
     return 0
 
 
 def _dispatch(args: argparse.Namespace) -> int:
     if args.command == 'fetch':
-        for path in fetch_tokenizer(args.repo, args.dir):
-            write(f'{args.repo}: {path}')
-        return 0
+        return _cmd_fetch(args)
     if args.command == 'coverage':
-        result = compute_coverage(load_tokenizer(args.dir))
-        write(result.to_json() if args.json else result.format())
+        models = _load_models(args)
+        if args.json:
+            _emit_json(models, lambda m: compute_coverage(m.backend).to_json())
+        else:
+            _emit(models, lambda m: compute_coverage(m.backend).format())
         return 0
     if args.command == 'analyze':
         return _cmd_analyze(args)
     if args.command == 'compare':
-        result = compare_tokenizer(load_tokenizer(args.dir))
+        result = CompareResult([compare_backend(m.spec.key, m.backend) for m in _load_models(args)])
         write(result.to_json() if args.json else result.format())
         return 0
     if args.command == 'probe':
@@ -216,6 +255,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.WARNING)
     try:
         return _dispatch(args)
+    except UnknownModelError as e:
+        write_err(f'error: {e}')
+        return 2
     except TokenizerNotFoundError as e:
         write_err(f'error: {e}')
         return 1

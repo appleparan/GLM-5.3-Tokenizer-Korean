@@ -7,7 +7,7 @@ pytestmark = pytest.mark.integration
 
 
 def test_naive_decode_breaks_annyeong(real_tk):
-    ids = real_tk.encode('안녕하세요', add_special_tokens=False).ids
+    ids = real_tk.encode('안녕하세요')
     naive = ''.join(real_tk.decode([i]) for i in ids)
     assert '�' in naive
     assert real_tk.decode(ids) == '안녕하세요'

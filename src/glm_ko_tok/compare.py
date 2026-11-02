@@ -5,9 +5,8 @@ from collections import Counter
 from dataclasses import asdict, dataclass
 from typing import Any
 
-from glm_ko_tok.bytes_map import token_bytes
 from glm_ko_tok.coverage import HANGUL_END, HANGUL_START, hangul_syllables, ksx1001_syllables
-from glm_ko_tok.protocols import TokenizerLike
+from glm_ko_tok.protocols import TokenBackend
 
 
 def _legacy_set(codec: str, leads: range, trails: range = range(0xA1, 0xFF)) -> list[str]:
@@ -46,22 +45,19 @@ class SetStats:
 class VocabStats:
     """Composition of the vocab."""
 
+    vocab_size: int
     with_hangul: int
     with_han: int
     invalid_alone: int
 
 
 @dataclass(frozen=True)
-class CompareResult:
-    """Full comparison."""
+class ModelCompare:
+    """Comparison for one model."""
 
+    key: str
     sets: list[SetStats]
     vocab: VocabStats
-
-    def to_json(self) -> str:
-        """Return the result as JSON."""
-        data: dict[str, Any] = asdict(self)
-        return json.dumps(data, ensure_ascii=False, indent=2)
 
     def format(self) -> str:
         """Return a table."""
@@ -78,28 +74,54 @@ class CompareResult:
         v = self.vocab
         lines.append('')
         lines.append(
-            f'vocab tokens with Hangul syllable: {v.with_hangul}; with CJK ideograph: '
-            f'{v.with_han}; invalid UTF-8 alone: {v.invalid_alone}'
+            f'vocab size: {v.vocab_size}; tokens with Hangul syllable: {v.with_hangul}; '
+            f'with CJK ideograph: {v.with_han}; invalid UTF-8 alone: {v.invalid_alone}'
         )
         return '\n'.join(lines)
 
 
-def _stats(tk: TokenizerLike, name: str, chars: list[str]) -> SetStats:
+@dataclass(frozen=True)
+class CompareResult:
+    """Comparison across one or more models."""
+
+    models: list[ModelCompare]
+
+    def to_json(self) -> str:
+        """Return the result as JSON, keyed by model."""
+        data: dict[str, Any] = {m.key: asdict(m) for m in self.models}
+        return json.dumps(data, ensure_ascii=False, indent=2)
+
+    def summary_table(self) -> str:
+        """Return one row per character set, one column per model, cell = 1-token %."""
+        width = max(10, *(len(m.key) for m in self.models))
+        head = f'{"set":<20} ' + ' '.join(f'{m.key:>{width}}' for m in self.models)
+        lines = [head]
+        for i, row in enumerate(self.models[0].sets):
+            cells = ' '.join(f'{m.sets[i].one_token_ratio:>{width}.1%}' for m in self.models)
+            lines.append(f'{row.name:<20} {cells}')
+        return '\n'.join(lines)
+
+    def format(self) -> str:
+        """Return a table per model, plus a summary table when there are several models."""
+        if len(self.models) == 1:
+            return self.models[0].format()
+        parts = [f'== {m.key} ==\n{m.format()}' for m in self.models]
+        parts.append(f'== summary: 1-token % ==\n{self.summary_table()}')
+        return '\n\n'.join(parts)
+
+
+def _stats(backend: TokenBackend, name: str, chars: list[str]) -> SetStats:
     counts: Counter[int] = Counter()
     for c in chars:
-        counts[min(len(tk.encode(c, add_special_tokens=False).ids), 4)] += 1
+        counts[min(len(backend.encode(c)), 4)] += 1
     by_count = {k: counts[k] for k in (1, 2, 3, 4)}
     return SetStats(name, len(chars), by_count, by_count[1] / len(chars))
 
 
-def vocab_composition(tk: TokenizerLike) -> VocabStats:
+def vocab_composition(backend: TokenBackend) -> VocabStats:
     """Count vocab tokens containing Hangul, CJK ideographs, or invalid bytes alone."""
     hangul = han = invalid = 0
-    for token in tk.get_vocab():
-        try:
-            data = token_bytes(token)
-        except ValueError:
-            continue
+    for data in backend.iter_vocab_bytes():
         text = data.decode('utf-8', errors='ignore')
         hangul += any(HANGUL_START <= ord(c) <= HANGUL_END for c in text)
         han += any(0x4E00 <= ord(c) <= 0x9FFF for c in text)
@@ -107,17 +129,18 @@ def vocab_composition(tk: TokenizerLike) -> VocabStats:
             data.decode('utf-8')
         except UnicodeDecodeError:
             invalid += 1
-    return VocabStats(hangul, han, invalid)
+    return VocabStats(backend.vocab_size, hangul, han, invalid)
 
 
-def compare_tokenizer(tk: TokenizerLike) -> CompareResult:
-    """Compare token cost across character sets.
+def compare_backend(key: str, backend: TokenBackend) -> ModelCompare:
+    """Compare token cost across character sets for one model.
 
     Args:
-        tk: Tokenizer.
+        key: Model key.
+        backend: Tokenizer backend.
 
     Returns:
         Per-set stats and vocab composition.
     """
-    sets = [_stats(tk, name, chars) for name, chars in char_sets().items()]
-    return CompareResult(sets=sets, vocab=vocab_composition(tk))
+    sets = [_stats(backend, name, chars) for name, chars in char_sets().items()]
+    return ModelCompare(key=key, sets=sets, vocab=vocab_composition(backend))
