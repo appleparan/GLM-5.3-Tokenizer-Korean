@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from glm_ko_tok import probe
+from glm_ko_tok.compare import compare_tokenizer
 from glm_ko_tok.coverage import compute_coverage
 from glm_ko_tok.fetch import DEFAULT_REPO, fetch_tokenizer
 from glm_ko_tok.loader import DEFAULT_DIR, TokenizerNotFoundError, load_tokenizer
@@ -42,6 +43,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser('stream-sim', help='simulate streaming decode')
     _add_input_args(p)
+    p.add_argument('--json', action='store_true')
+    p = sub.add_parser('compare', help='token cost of Hangul vs Hanja vs Chinese')
+    p.add_argument('--dir', default=str(DEFAULT_DIR))
     p.add_argument('--json', action='store_true')
     _add_probe_parser(sub)
     return parser
@@ -187,6 +191,10 @@ def _dispatch(args: argparse.Namespace) -> int:
         return 0
     if args.command == 'analyze':
         return _cmd_analyze(args)
+    if args.command == 'compare':
+        result = compare_tokenizer(load_tokenizer(args.dir))
+        write(result.to_json() if args.json else result.format())
+        return 0
     if args.command == 'probe':
         return _cmd_probe(args)
     if args.command == 'stream-sim':
