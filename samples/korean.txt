@@ -1,0 +1,48 @@
+# everyday sentences
+안녕하세요
+오늘 날씨가 정말 좋네요.
+저는 서울에서 태어나 부산에서 자랐습니다.
+이 코드를 리팩터링해 주세요.
+감사합니다. 좋은 하루 보내세요!
+# rare syllables
+똠방각하
+뷁
+쀍
+햏
+펲
+# jamo only
+ㅋㅋㅋ
+ㅠㅠ
+ㄱㄴㄷ
+# NFD decomposed Hangul (written via escapes)
+한글
+안녕하세요
+똠방각하
+# old Hangul
+ᄒᆞᆫ글
+한글
+# hanja mix
+大韓民國
+대한민국(大韓民國)은 민주공화국이다.
+# Korean + English + code
+함수 `def main():`를 호출하세요.
+git commit -m "버그 수정"
+print("안녕, world")
+# Korean in JSON string
+{"message": "안녕하세요", "name": "홍길동"}
+{"text": "한글\n줄바꿈"}
+# emoji mix
+좋아요 👍
+축하해요🎉🎉 생일 축하합니다
+👨‍👩‍👧 가족
+# fullwidth and CJK punctuation
+안녕하세요。「감사합니다」、네！
+ＡＢＣ１２３ 전각 문자
+《제목》 『책』 …
+# numbers and units
+3.5㎏
+1,000원
+25℃ 날씨
+2026년 11월 3일 오후 3시 30분
+# long sentence
+대한민국의 헌법은 국민의 자유와 권리를 보장하고, 모든 국민은 법 앞에 평등하며, 누구든지 성별, 종교 또는 사회적 신분에 의하여 정치적, 경제적, 사회적, 문화적 생활의 모든 영역에 있어서 차별을 받지 아니한다고 규정하고 있습니다.
