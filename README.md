@@ -91,7 +91,7 @@ uv run glm-ko-tok probe --target openrouter --api responses \
   --provider <UpstreamName> --out runs/openrouter.jsonl
 ```
 
-- The model id `z-ai/glm-5.3` is a placeholder. Needs verification on openrouter.ai/models.
+- The model id `z-ai/glm-5.3` was listed on openrouter.ai/models on 2026-11-03.
 - `--provider NAME` (repeatable) pins the upstream provider and disables fallbacks, because
   providers may detokenize differently.
 - Optional OpenRouter headers come from `OPENROUTER_REFERER` and `OPENROUTER_TITLE`.
