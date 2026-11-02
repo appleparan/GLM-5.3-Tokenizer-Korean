@@ -1,31 +1,38 @@
-"""Shared fixtures: a fake byte-level tokenizer and the optional real tokenizer."""
+"""Shared fixtures: a fake byte-level backend and the optional real tokenizers."""
 
+from collections.abc import Iterator
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
-from glm_ko_tok.bytes_map import bytes_to_unicode
+from glm_ko_tok.loader import (
+    DEFAULT_ROOT,
+    LEGACY_DIR,
+    LoadedModel,
+    TokenizerNotFoundError,
+    load_model,
+)
+from glm_ko_tok.sample_stats import read_parallel_pairs
+from glm_ko_tok.textio import read_cases
 
-REAL_DIR = Path(__file__).resolve().parent.parent / 'tokenizer'
+ROOT = Path(__file__).resolve().parent.parent
+SAMPLES = ROOT / 'samples'
 
 
 class FakeTokenizer:
-    """Greedy longest-match byte-level tokenizer with a configurable vocab."""
+    """Greedy longest-match byte-level backend with a configurable vocab."""
 
     def __init__(self, extra: list[bytes]) -> None:
-        table = bytes_to_unicode()
-        pieces = [bytes([b]) for b in range(256)] + list(extra)
-        self._pieces = pieces
-        self._ids = {p: i for i, p in enumerate(pieces)}
-        self._table = table
-        self._max = max(len(p) for p in pieces)
+        self._pieces = [bytes([b]) for b in range(256)] + list(extra)
+        self._ids = {p: i for i, p in enumerate(self._pieces)}
+        self._max = max(len(p) for p in self._pieces)
 
-    def _to_str(self, piece: bytes) -> str:
-        return ''.join(self._table[b] for b in piece)
+    @property
+    def vocab_size(self) -> int:
+        return len(self._pieces)
 
-    def encode(self, sequence: str, *, add_special_tokens: bool = False) -> SimpleNamespace:
-        data = sequence.encode('utf-8')
+    def encode(self, text: str) -> list[int]:
+        data = text.encode('utf-8')
         ids: list[int] = []
         pos = 0
         while pos < len(data):
@@ -35,29 +42,47 @@ class FakeTokenizer:
                     ids.append(self._ids[piece])
                     pos += size
                     break
-        return SimpleNamespace(ids=ids, tokens=[self.id_to_token(i) for i in ids])
+        return ids
 
-    def id_to_token(self, token_id: int) -> str:
-        return self._to_str(self._pieces[token_id])
+    def token_bytes(self, token_id: int) -> bytes:
+        return self._pieces[token_id]
 
-    def decode(self, ids: list[int], skip_special_tokens: bool = False) -> str:
+    def decode(self, ids: list[int]) -> str:
         return b''.join(self._pieces[i] for i in ids).decode('utf-8', errors='replace')
 
-    def get_vocab(self) -> dict[str, int]:
-        return {self._to_str(p): i for p, i in self._ids.items()}
+    def iter_vocab_bytes(self) -> Iterator[bytes]:
+        yield from self._pieces
 
 
 @pytest.fixture
 def fake_tk() -> FakeTokenizer:
-    """Fake tokenizer where 한 is split 1+2 bytes and 국 is a single token."""
-    return FakeTokenizer(['국'.encode(), b'\xed', b'\x95\x9c', b'ab'])
+    """Fake backend where 한 is split 1+2 bytes and 국 is a single token."""
+    return FakeTokenizer(['국'.encode(), b'\x95\x9c', b'ab'])
 
 
 @pytest.fixture(scope='session')
-def real_tk():
-    """Real GLM-5.3 tokenizer, or skip when not downloaded."""
-    if not (REAL_DIR / 'tokenizer.json').exists():
-        pytest.skip('real tokenizer not downloaded')
-    from glm_ko_tok.loader import load_tokenizer
+def load_real():
+    """Return a loader for a real downloaded model; the test is skipped when files are absent."""
 
-    return load_tokenizer(REAL_DIR)
+    def _load(key: str) -> LoadedModel:
+        try:
+            return load_model(key, ROOT / DEFAULT_ROOT, ROOT / LEGACY_DIR)
+        except TokenizerNotFoundError:
+            pytest.skip(f'{key} tokenizer not downloaded')
+
+    return _load
+
+
+@pytest.fixture(scope='session')
+def sample_lines() -> list[str]:
+    """Every line of samples/korean.txt and both sides of samples/parallel_ko_zh.txt."""
+    lines = read_cases(SAMPLES / 'korean.txt')
+    for ko, zh in read_parallel_pairs(SAMPLES / 'parallel_ko_zh.txt'):
+        lines.extend([ko, zh])
+    return lines
+
+
+@pytest.fixture(scope='session')
+def real_tk(load_real):
+    """Real GLM-5.3 backend, or skip when not downloaded."""
+    return load_real('glm-5.3').backend

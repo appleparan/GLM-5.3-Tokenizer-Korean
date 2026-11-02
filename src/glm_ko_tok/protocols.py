@@ -1,37 +1,32 @@
-"""Structural types for the tokenizer API subset we use."""
+"""Structural types for the tokenizer backends."""
 
+from collections.abc import Iterator
 from typing import Protocol
 
 
-class EncodingLike(Protocol):
-    """Result of `encode`."""
+class TokenBackend(Protocol):
+    """The small tokenizer API every analysis needs.
+
+    Encoding never adds special tokens. Special tokens are not part of this analysis.
+    """
 
     @property
-    def ids(self) -> list[int]:
-        """Token ids."""
+    def vocab_size(self) -> int:
+        """Number of tokens in the vocab."""
         ...
 
-    @property
-    def tokens(self) -> list[str]:
-        """Token strings (ByteLevel alphabet)."""
+    def encode(self, text: str) -> list[int]:
+        """Encode text to token ids."""
         ...
 
-
-class TokenizerLike(Protocol):
-    """Subset of `tokenizers.Tokenizer` used here."""
-
-    def encode(self, sequence: str, *, add_special_tokens: bool = True) -> EncodingLike:
-        """Encode text."""
+    def token_bytes(self, token_id: int) -> bytes:
+        """Return the raw bytes a token id stands for."""
         ...
 
-    def decode(self, ids: list[int], skip_special_tokens: bool = True) -> str:
-        """Decode ids."""
+    def decode(self, ids: list[int]) -> str:
+        """Decode ids to text; invalid UTF-8 becomes U+FFFD."""
         ...
 
-    def id_to_token(self, id: int) -> str | None:
-        """Return the token string for an id."""
-        ...
-
-    def get_vocab(self, with_added_tokens: bool = True) -> dict[str, int]:
-        """Return the vocab."""
+    def iter_vocab_bytes(self) -> Iterator[bytes]:
+        """Yield the raw bytes of every byte-level vocab token."""
         ...

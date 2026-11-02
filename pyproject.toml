@@ -10,6 +10,7 @@ requires-python = ">=3.13"
 dependencies = [
     "httpx",
     "huggingface_hub",
+    "tiktoken>=0.14.0",
     "tokenizers",
 ]
 
@@ -26,6 +27,9 @@ dev = [
     "pytest-cov",
     "ruff",
     "ty",
+]
+verify = [
+    "transformers>=5.20.2",
 ]
 
 [tool.ruff]
@@ -49,8 +53,11 @@ inline-quotes = "single"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "--cov=glm_ko_tok --cov-report=term-missing"
-markers = ["integration: uses the real downloaded tokenizer (skipped if absent)"]
+addopts = "--cov=glm_ko_tok --cov-report=term-missing -m 'not remote_code'"
+markers = [
+    "integration: uses the real downloaded tokenizer (skipped if absent)",
+    "remote_code: runs code downloaded from the Hub (trust_remote_code); opt in with RUN_REMOTE_CODE=1",
+]
 
 [tool.coverage.run]
 branch = true

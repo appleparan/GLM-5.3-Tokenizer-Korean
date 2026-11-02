@@ -5,6 +5,8 @@ from pathlib import Path
 import pytest
 
 from glm_ko_tok import cli
+from glm_ko_tok.loader import LoadedModel
+from glm_ko_tok.models import MODELS
 from glm_ko_tok.stream_sim import simulate_stream
 
 FFFD = '�'
@@ -28,6 +30,14 @@ def test_naive_breaks_incremental_recovers(fake_tk):
     assert by['incremental'].equals_truth
     assert not by['incremental'].lossy
     assert by['incremental'].fffd_count == 0
+
+
+def test_tiktoken_style_backend_skips_decode_stream_and_naive_breaks(fake_tk):
+    report = simulate_stream(fake_tk, '한')
+    by = {r.name: r for r in report.results}
+    assert by['decode_stream'].skipped
+    assert 'HF' in by['decode_stream'].note
+    assert by['naive'].fffd_count == 3
 
 
 def test_decode_stream_skipped_for_fake(fake_tk):
@@ -55,7 +65,9 @@ def test_report_json_and_format(fake_tk):
 
 @pytest.fixture
 def _patched(fake_tk, monkeypatch):
-    monkeypatch.setattr(cli, 'load_tokenizer', lambda _d: fake_tk)
+    monkeypatch.setattr(
+        cli, 'load_model', lambda key, _r: LoadedModel(MODELS[key], fake_tk, Path('nowhere'))
+    )
 
 
 @pytest.mark.usefixtures('_patched')
@@ -77,3 +89,12 @@ def test_cli_stream_sim_per_line(tmp_path: Path, capsys):
 @pytest.mark.usefixtures('_patched')
 def test_cli_stream_sim_requires_input(capsys):
     assert cli.main(['stream-sim']) == 2
+
+
+@pytest.mark.usefixtures('_patched')
+def test_cli_per_line_total_shows_dash_when_decode_stream_skipped(tmp_path: Path, capsys):
+    f = tmp_path / 's.txt'
+    f.write_text('한a\n', encoding='utf-8')
+    assert cli.main(['stream-sim', '--file', str(f), '--per-line']) == 0
+    total = next(ln for ln in capsys.readouterr().out.splitlines() if ln.startswith('TOTAL'))
+    assert total.split()[-1] == '-'
