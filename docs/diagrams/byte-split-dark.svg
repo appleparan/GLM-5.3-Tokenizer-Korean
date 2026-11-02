@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 464" width="800" height="464" role="img" aria-labelledby="byte-split-dark-title byte-split-dark-desc">
+  <title id="byte-split-dark-title">안녕 vs 你好: 바이트와 토큰 경계</title>
+  <desc id="byte-split-dark-desc">Byte and token boundaries in GLM-5.3: the Korean 안녕 splits the character 녕 across two tokens, while 你好 is one token.</desc>
+  <style>
+    .sans { font-family: 'Geist', 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Noto Sans CJK KR', 'Malgun Gothic', sans-serif; }
+    .mono { font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Noto Sans Mono CJK KR', monospace; }
+    .serif { font-family: 'Instrument Serif', 'Noto Serif KR', serif; }
+  </style>
+  <rect width="100%" height="100%" fill="#0d1117"/>
+  <text x="24" y="40" class="sans" font-size="24" font-weight="600" fill="#f5f5f5" text-anchor="start" >안녕 vs 你好: 같은 6바이트, 다른 토큰 경계</text>
+  <text x="24" y="64" class="sans" font-size="12" font-weight="400" fill="#bfc0c0" text-anchor="start" >GLM-5.3 tokenizer.json 실측, UTF-8 바이트를 셀 하나로 표시</text>
+  <text x="24" y="168" class="sans" font-size="24" font-weight="600" fill="#f5f5f5" text-anchor="start" >안녕</text>
+  <text x="24" y="192" class="mono" font-size="12" font-weight="400" fill="#bfc0c0" text-anchor="start" >6 bytes → 3 tokens</text>
+  <path d="M248 132 V124 H480 V132" fill="none" stroke="#9a9fa8" stroke-width="1"/>
+  <text x="364" y="116" class="sans" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >안</text>
+  <path d="M488 132 V124 H720 V132" fill="none" stroke="#f08a59" stroke-width="1"/>
+  <text x="604" y="116" class="sans" font-size="16" font-weight="600" fill="#f08a59" text-anchor="middle" >녕</text>
+  <rect x="248" y="136" width="72" height="40" rx="4" fill="rgba(245,245,245,0.05)" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="284" y="161" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >EC</text>
+  <rect x="328" y="136" width="72" height="40" rx="4" fill="rgba(245,245,245,0.05)" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="364" y="161" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >95</text>
+  <rect x="408" y="136" width="72" height="40" rx="4" fill="rgba(245,245,245,0.05)" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="444" y="161" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >88</text>
+  <rect x="488" y="136" width="72" height="40" rx="4" fill="rgba(240,138,89,0.16)" stroke="#f08a59" stroke-width="1"/>
+  <text x="524" y="161" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >EB</text>
+  <rect x="568" y="136" width="72" height="40" rx="4" fill="rgba(240,138,89,0.16)" stroke="#f08a59" stroke-width="1"/>
+  <text x="604" y="161" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >85</text>
+  <rect x="648" y="136" width="72" height="40" rx="4" fill="rgba(240,138,89,0.16)" stroke="#f08a59" stroke-width="1"/>
+  <text x="684" y="161" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >95</text>
+  <path d="M248 180 V188 H480 V180" fill="none" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="364" y="212" class="mono" font-size="12" font-weight="600" fill="#f5f5f5" text-anchor="middle" >133420</text>
+  <text x="364" y="232" class="mono" font-size="16" font-weight="400" fill="#f5f5f5" text-anchor="middle" >→ 안</text>
+  <path d="M488 180 V188 H640 V180" fill="none" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="564" y="212" class="mono" font-size="12" font-weight="600" fill="#f5f5f5" text-anchor="middle" >73588</text>
+  <text x="564" y="232" class="mono" font-size="12" font-weight="400" fill="#bfc0c0" text-anchor="middle" >→ �</text>
+  <path d="M648 180 V188 H720 V180" fill="none" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="684" y="212" class="mono" font-size="12" font-weight="600" fill="#f5f5f5" text-anchor="middle" >243</text>
+  <text x="684" y="232" class="mono" font-size="12" font-weight="400" fill="#bfc0c0" text-anchor="middle" >→ �</text>
+  <line x1="644" y1="100" x2="644" y2="204" stroke="#f08a59" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="636" y="96" class="sans" font-size="12" font-weight="600" fill="#f08a59" text-anchor="end" >토큰 경계가 녕 한가운데를 가름</text>
+  <line x1="24" y1="256" x2="776" y2="256" stroke="rgba(245,245,245,0.14)" stroke-width="0.8"/>
+  <text x="24" y="328" class="sans" font-size="24" font-weight="600" fill="#f5f5f5" text-anchor="start" >你好</text>
+  <text x="24" y="352" class="mono" font-size="12" font-weight="400" fill="#bfc0c0" text-anchor="start" >6 bytes → 1 token</text>
+  <path d="M248 292 V284 H480 V292" fill="none" stroke="#9a9fa8" stroke-width="1"/>
+  <text x="364" y="276" class="sans" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >你</text>
+  <path d="M488 292 V284 H720 V292" fill="none" stroke="#9a9fa8" stroke-width="1"/>
+  <text x="604" y="276" class="sans" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >好</text>
+  <rect x="248" y="296" width="72" height="40" rx="4" fill="rgba(245,245,245,0.05)" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="284" y="321" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >E4</text>
+  <rect x="328" y="296" width="72" height="40" rx="4" fill="rgba(245,245,245,0.05)" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="364" y="321" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >BD</text>
+  <rect x="408" y="296" width="72" height="40" rx="4" fill="rgba(245,245,245,0.05)" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="444" y="321" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >A0</text>
+  <rect x="488" y="296" width="72" height="40" rx="4" fill="rgba(245,245,245,0.05)" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="524" y="321" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >E5</text>
+  <rect x="568" y="296" width="72" height="40" rx="4" fill="rgba(245,245,245,0.05)" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="604" y="321" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >A5</text>
+  <rect x="648" y="296" width="72" height="40" rx="4" fill="rgba(245,245,245,0.05)" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="684" y="321" class="mono" font-size="16" font-weight="600" fill="#f5f5f5" text-anchor="middle" >BD</text>
+  <path d="M248 340 V348 H720 V340" fill="none" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="484" y="372" class="mono" font-size="12" font-weight="600" fill="#f5f5f5" text-anchor="middle" >109377</text>
+  <text x="484" y="392" class="mono" font-size="16" font-weight="400" fill="#f5f5f5" text-anchor="middle" >→ 你好</text>
+  <line x1="24" y1="412" x2="776" y2="412" stroke="rgba(245,245,245,0.14)" stroke-width="0.8"/>
+  <rect x="24" y="428" width="12" height="12" rx="2" fill="rgba(240,138,89,0.16)" stroke="#f08a59"/>
+  <text x="44" y="439" class="sans" font-size="12" font-weight="400" fill="#bfc0c0" text-anchor="start" >문자가 토큰 경계에서 잘린 바이트</text>
+  <text x="344" y="439" class="mono" font-size="12" font-weight="400" fill="#bfc0c0" text-anchor="start" >�</text>
+  <text x="360" y="439" class="sans" font-size="12" font-weight="400" fill="#bfc0c0" text-anchor="start" >= 토큰만 따로 디코딩하면 깨지는 불완전한 UTF-8</text>
+</svg>

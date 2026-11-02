@@ -1,0 +1,60 @@
+[project]
+name = "glm-ko-tok"
+version = "0.1.0"
+description = "Analyze why Korean text breaks (U+FFFD) with the GLM-5.3 byte-level BPE tokenizer"
+readme = "README.md"
+authors = [
+    { name = "Jongsu Liam Kim", email = "jongsukim8@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "httpx",
+    "huggingface_hub",
+    "tokenizers",
+]
+
+[project.scripts]
+glm-ko-tok = "glm_ko_tok.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "ty",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+select = ["S", "ANN", "D", "B", "C4", "PTH", "UP", "SIM", "PERF", "PT", "I", "N", "RUF", "E", "F"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["ANN", "D100", "D102", "D103", "D104", "D107", "S101"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=glm_ko_tok --cov-report=term-missing"
+markers = ["integration: uses the real downloaded tokenizer (skipped if absent)"]
+
+[tool.coverage.run]
+branch = true
+source = ["glm_ko_tok"]
+
+[tool.coverage.report]
+fail_under = 50

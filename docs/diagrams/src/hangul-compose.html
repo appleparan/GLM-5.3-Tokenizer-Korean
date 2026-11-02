@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>한글 음절 계산식과 NFD 분해</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #ffffff;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #eb6c36;
+      --font-sans:     'Geist', 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif KR', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; height: auto; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Data flow · Diagram Design</p>
+    <h1>한글 음절 계산식과 NFD 분해</h1>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="440" viewBox="0 0 960 440" role="img" aria-labelledby="hangul-compose-light-title hangul-compose-light-desc">
+<title id="hangul-compose-light-title">한글 음절 계산식과 NFD 분해</title>
+<desc id="hangul-compose-light-desc">초성 ㅎ, 중성 ㅏ, 종성 ㄴ을 계산식으로 합쳐 U+D55C 한을 만들고 UTF-8 3바이트로 쓴다. 같은 글자를 NFD로 풀면 9바이트가 되고 GLM-5.3은 9개 토큰으로 쪼갠다.</desc>
+<defs>
+<style>
+.sans { font-family: 'Geist', 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Noto Sans CJK KR', 'Malgun Gothic', sans-serif; }
+.mono { font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Noto Sans Mono CJK KR', monospace; }
+.serif { font-family: 'Instrument Serif', 'Noto Serif KR', serif; }
+</style>
+<marker id="hangul-compose-light-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+<marker id="hangul-compose-light-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<path d="M208 88 H228 Q236 88 236 96 V100 Q236 108 244 108 H264" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#hangul-compose-light-arrow)"/>
+<path d="M208 152 H264" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#hangul-compose-light-arrow)"/>
+<path d="M208 216 H228 Q236 216 236 208 V204 Q236 196 244 196 H264" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#hangul-compose-light-arrow)"/>
+<path d="M512 152 H568" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#hangul-compose-light-arrow)"/>
+<path d="M712 152 H768" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#hangul-compose-light-arrow)"/>
+<path d="M640 184 V268 Q640 276 632 276 H132 Q124 276 124 284 V328" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#hangul-compose-light-arrow)"/>
+<path d="M248 360 H304" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#hangul-compose-light-arrow)"/>
+<path d="M560 360 H616" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#hangul-compose-light-arrow-accent)"/>
+<rect x="344" y="254" width="72" height="16" rx="2" fill="#ffffff"/>
+<text x="380" y="266" fill="#7a8399" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.06em">NFD 분해</text>
+<rect x="40" y="64" width="168" height="48" rx="6" fill="#ffffff"/>
+<rect x="40" y="64" width="168" height="48" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="124" y="84" fill="#2d3142" font-size="12" class="sans" text-anchor="middle" font-weight="600">초성 (initial)</text>
+<text x="124" y="102" fill="#4f5d75" font-size="12" class="mono" text-anchor="middle">ㅎ · index 18 of 19</text>
+<rect x="40" y="128" width="168" height="48" rx="6" fill="#ffffff"/>
+<rect x="40" y="128" width="168" height="48" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="124" y="148" fill="#2d3142" font-size="12" class="sans" text-anchor="middle" font-weight="600">중성 (medial)</text>
+<text x="124" y="166" fill="#4f5d75" font-size="12" class="mono" text-anchor="middle">ㅏ · index 0 of 21</text>
+<rect x="40" y="192" width="168" height="48" rx="6" fill="#ffffff"/>
+<rect x="40" y="192" width="168" height="48" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="124" y="212" fill="#2d3142" font-size="12" class="sans" text-anchor="middle" font-weight="600">종성 (final)</text>
+<text x="124" y="230" fill="#4f5d75" font-size="12" class="mono" text-anchor="middle">ㄴ · index 4 of 28</text>
+<rect x="264" y="96" width="248" height="112" rx="6" fill="#ffffff"/>
+<rect x="264" y="96" width="248" height="112" rx="6" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-opacity="1" stroke-width="1"/>
+<text x="388" y="120" fill="#7a8399" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">FORMULA</text>
+<text x="388" y="148" fill="#2d3142" font-size="12" class="mono" text-anchor="middle">0xAC00 + (18×21 + 0)×28 + 4</text>
+<text x="388" y="172" fill="#7a8399" font-size="8" class="mono" text-anchor="middle">0xAC00 + (초성×21 + 중성)×28 + 종성</text>
+<text x="388" y="192" fill="#4f5d75" font-size="12" class="mono" text-anchor="middle">= 0xD55C</text>
+<rect x="568" y="120" width="144" height="64" rx="6" fill="#ffffff"/>
+<rect x="568" y="120" width="144" height="64" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="640" y="136" fill="#7a8399" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">CODE POINT</text>
+<text x="640" y="158" fill="#2d3142" font-size="12" class="mono" text-anchor="middle" font-weight="600">U+D55C '한'</text>
+<text x="640" y="176" fill="#7a8399" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">NFC</text>
+<rect x="768" y="120" width="152" height="64" rx="6" fill="#ffffff"/>
+<rect x="768" y="120" width="152" height="64" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="844" y="136" fill="#7a8399" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">UTF-8</text>
+<text x="844" y="158" fill="#2d3142" font-size="12" class="mono" text-anchor="middle" font-weight="600">ED 95 9C</text>
+<text x="844" y="176" fill="#4f5d75" font-size="12" class="mono" text-anchor="middle">3 bytes</text>
+<rect x="40" y="328" width="208" height="64" rx="6" fill="#ffffff"/>
+<rect x="40" y="328" width="208" height="64" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="144" y="344" fill="#7a8399" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">NFD</text>
+<text x="144" y="366" fill="#2d3142" font-size="12" class="mono" text-anchor="middle" font-weight="600">U+1112 U+1161 U+11AB</text>
+<text x="144" y="384" fill="#4f5d75" font-size="12" class="sans" text-anchor="middle">자모 3글자</text>
+<rect x="304" y="328" width="256" height="64" rx="6" fill="#ffffff"/>
+<rect x="304" y="328" width="256" height="64" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="432" y="344" fill="#7a8399" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">UTF-8</text>
+<text x="432" y="366" fill="#2d3142" font-size="12" class="mono" text-anchor="middle" font-weight="600">E1 84 92 E1 85 A1 E1 86 AB</text>
+<text x="432" y="384" fill="#4f5d75" font-size="12" class="mono" text-anchor="middle">9 bytes</text>
+<rect x="616" y="312" width="304" height="104" rx="6" fill="#ffffff"/>
+<rect x="616" y="312" width="304" height="104" rx="6" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-opacity="1" stroke-width="1"/>
+<text x="768" y="332" fill="#eb6c36" font-size="12" class="sans" text-anchor="middle" font-weight="600">GLM-5.3 → 토큰 9개</text>
+<rect x="626" y="346" width="28" height="32" rx="6" fill="#ffffff"/>
+<rect x="626" y="346" width="28" height="32" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="640" y="367" fill="#2d3142" font-size="12" class="mono" text-anchor="middle">�</text>
+<rect x="658" y="346" width="28" height="32" rx="6" fill="#ffffff"/>
+<rect x="658" y="346" width="28" height="32" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="672" y="367" fill="#2d3142" font-size="12" class="mono" text-anchor="middle">�</text>
+<rect x="690" y="346" width="28" height="32" rx="6" fill="#ffffff"/>
+<rect x="690" y="346" width="28" height="32" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="704" y="367" fill="#2d3142" font-size="12" class="mono" text-anchor="middle">�</text>
+<rect x="722" y="346" width="28" height="32" rx="6" fill="#ffffff"/>
+<rect x="722" y="346" width="28" height="32" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="736" y="367" fill="#2d3142" font-size="12" class="mono" text-anchor="middle">�</text>
+<rect x="754" y="346" width="28" height="32" rx="6" fill="#ffffff"/>
+<rect x="754" y="346" width="28" height="32" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="768" y="367" fill="#2d3142" font-size="12" class="mono" text-anchor="middle">�</text>
+<rect x="786" y="346" width="28" height="32" rx="6" fill="#ffffff"/>
+<rect x="786" y="346" width="28" height="32" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="800" y="367" fill="#2d3142" font-size="12" class="mono" text-anchor="middle">�</text>
+<rect x="818" y="346" width="28" height="32" rx="6" fill="#ffffff"/>
+<rect x="818" y="346" width="28" height="32" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="832" y="367" fill="#2d3142" font-size="12" class="mono" text-anchor="middle">�</text>
+<rect x="850" y="346" width="28" height="32" rx="6" fill="#ffffff"/>
+<rect x="850" y="346" width="28" height="32" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="864" y="367" fill="#2d3142" font-size="12" class="mono" text-anchor="middle">�</text>
+<rect x="882" y="346" width="28" height="32" rx="6" fill="#ffffff"/>
+<rect x="882" y="346" width="28" height="32" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="896" y="367" fill="#2d3142" font-size="12" class="mono" text-anchor="middle">�</text>
+<text x="768" y="402" fill="#2d3142" font-size="12" class="sans" text-anchor="middle">토큰마다 혼자서는 �</text>
+</svg>
+
+  </div>
+</body>
+</html>

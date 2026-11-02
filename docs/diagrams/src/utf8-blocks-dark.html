@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UTF-8 바이트 수와 한글·한자 블록</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #0d1117;
+      --color-ink:     #f5f5f5;
+      --color-muted:   #bfc0c0;
+      --color-accent:  #f08a59;
+      --font-sans:     'Geist', 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif KR', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body { font-family: var(--font-sans); background: var(--color-paper); color: var(--color-ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 3rem 2rem; }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; color: var(--color-muted); margin-bottom: 0.5rem; }
+    h1 { font-family: var(--font-serif); font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem); font-weight: 400; letter-spacing: -0.02em; line-height: 1.15; color: var(--color-ink); margin-bottom: 1.5rem; }
+    svg { width: 100%; height: auto; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Layer stack · Diagram Design</p>
+    <h1>UTF-8 바이트 수와 한글·한자 블록</h1>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="552" viewBox="0 0 960 552" role="img" aria-labelledby="utf8-blocks-dark-title utf8-blocks-dark-desc">
+<title id="utf8-blocks-dark-title">UTF-8 바이트 수와 한글·한자 블록</title>
+<desc id="utf8-blocks-dark-desc">코드포인트 구간별 UTF-8 바이트 수를 쌓은 도표. 한글 음절과 CJK 통합 한자는 모두 3바이트 구간에 있고 첫 바이트만 다르다.</desc>
+<defs>
+<style>
+.sans { font-family: 'Geist', 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Noto Sans CJK KR', 'Malgun Gothic', sans-serif; }
+.mono { font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Noto Sans Mono CJK KR', monospace; }
+.serif { font-family: 'Instrument Serif', 'Noto Serif KR', serif; }
+</style>
+<marker id="utf8-blocks-dark-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bfc0c0"/></marker>
+<marker id="utf8-blocks-dark-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#f08a59"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#0d1117"/>
+<rect x="40" y="40" width="880" height="440" rx="6" fill="#0d1117"/>
+<rect x="40" y="40" width="880" height="440" rx="6" fill="#0d1117" fill-opacity="1" stroke="#f5f5f5" stroke-opacity="1" stroke-width="1"/>
+<line x1="40" y1="104" x2="920" y2="104" stroke="#f5f5f5" stroke-opacity="0.12" stroke-width="0.8"/>
+<line x1="40" y1="168" x2="920" y2="168" stroke="#f5f5f5" stroke-opacity="0.12" stroke-width="0.8"/>
+<line x1="40" y1="376" x2="920" y2="376" stroke="#f5f5f5" stroke-opacity="0.12" stroke-width="0.8"/>
+<line x1="196" y1="40" x2="196" y2="480" stroke="#f5f5f5" stroke-opacity="0.12" stroke-width="0.8"/>
+<text x="56" y="68" fill="#f5f5f5" font-size="16" class="sans" font-weight="600">1 BYTE</text>
+<text x="56" y="88" fill="#bfc0c0" font-size="12" class="mono">U+0000–007F</text>
+<text x="56" y="132" fill="#f5f5f5" font-size="16" class="sans" font-weight="600">2 BYTES</text>
+<text x="56" y="152" fill="#bfc0c0" font-size="12" class="mono">U+0080–07FF</text>
+<text x="56" y="196" fill="#f5f5f5" font-size="16" class="sans" font-weight="600">3 BYTES</text>
+<text x="56" y="216" fill="#bfc0c0" font-size="12" class="mono">U+0800–FFFF</text>
+<text x="56" y="404" fill="#f5f5f5" font-size="16" class="sans" font-weight="600">4 BYTES</text>
+<text x="56" y="424" fill="#bfc0c0" font-size="12" class="mono">U+10000–10FFFF</text>
+<text x="208" y="76" fill="#bfc0c0" font-size="12" class="mono">ASCII · A = 41</text>
+<text x="208" y="140" fill="#bfc0c0" font-size="12" class="mono">é = C3 A9</text>
+<text x="208" y="200" fill="#bfc0c0" font-size="12" class="mono">1110xxxx 10xxxxxx 10xxxxxx</text>
+<rect x="208" y="216" width="132" height="140" rx="6" fill="#0d1117"/>
+<rect x="208" y="216" width="132" height="140" rx="6" fill="#f5f5f5" fill-opacity="0.05" stroke="#bfc0c0" stroke-opacity="1" stroke-width="1"/>
+<text x="274" y="236" fill="#8e98ac" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">HANGUL</text>
+<text x="274" y="260" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">Hangul</text>
+<text x="274" y="276" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">Jamo</text>
+<text x="274" y="304" fill="#bfc0c0" font-size="12" class="mono" text-anchor="middle">U+1100–11FF</text>
+<text x="274" y="326" fill="#bfc0c0" font-size="12" class="mono" text-anchor="middle">lead E1</text>
+<rect x="351" y="216" width="132" height="140" rx="6" fill="#0d1117"/>
+<rect x="351" y="216" width="132" height="140" rx="6" fill="#f5f5f5" fill-opacity="0.05" stroke="#bfc0c0" stroke-opacity="1" stroke-width="1"/>
+<text x="417" y="236" fill="#8e98ac" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">HANGUL</text>
+<text x="417" y="260" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">Hangul Compat.</text>
+<text x="417" y="276" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">Jamo</text>
+<text x="417" y="304" fill="#bfc0c0" font-size="12" class="mono" text-anchor="middle">U+3130–318F</text>
+<text x="417" y="326" fill="#bfc0c0" font-size="12" class="mono" text-anchor="middle">lead E3</text>
+<rect x="494" y="216" width="132" height="140" rx="6" fill="#0d1117"/>
+<rect x="494" y="216" width="132" height="140" rx="6" fill="#f5f5f5" fill-opacity="0.05" stroke="#bfc0c0" stroke-opacity="1" stroke-width="1"/>
+<text x="560" y="236" fill="#8e98ac" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">HAN</text>
+<text x="560" y="260" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">CJK</text>
+<text x="560" y="276" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">Extension A</text>
+<text x="560" y="304" fill="#bfc0c0" font-size="12" class="mono" text-anchor="middle">U+3400–4DBF</text>
+<text x="560" y="326" fill="#bfc0c0" font-size="12" class="mono" text-anchor="middle">lead E3–E4</text>
+<rect x="637" y="216" width="132" height="140" rx="6" fill="#0d1117"/>
+<rect x="637" y="216" width="132" height="140" rx="6" fill="#f08a59" fill-opacity="0.14" stroke="#f08a59" stroke-opacity="1" stroke-width="1"/>
+<text x="703" y="236" fill="#f08a59" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">HAN</text>
+<text x="703" y="260" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">CJK</text>
+<text x="703" y="276" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">Unified</text>
+<text x="703" y="304" fill="#bfc0c0" font-size="12" class="mono" text-anchor="middle">U+4E00–9FFF</text>
+<text x="703" y="326" fill="#f08a59" font-size="12" class="mono" text-anchor="middle" font-weight="600">lead E4–E9</text>
+<rect x="780" y="216" width="132" height="140" rx="6" fill="#0d1117"/>
+<rect x="780" y="216" width="132" height="140" rx="6" fill="#f08a59" fill-opacity="0.14" stroke="#f08a59" stroke-opacity="1" stroke-width="1"/>
+<text x="846" y="236" fill="#f08a59" font-size="8" class="mono" text-anchor="middle" letter-spacing="0.14em">HANGUL</text>
+<text x="846" y="260" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">Hangul</text>
+<text x="846" y="276" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">Syllables</text>
+<text x="846" y="304" fill="#bfc0c0" font-size="12" class="mono" text-anchor="middle">U+AC00–D7A3</text>
+<text x="846" y="326" fill="#f08a59" font-size="12" class="mono" text-anchor="middle" font-weight="600">lead EA–ED</text>
+<text x="846" y="346" fill="#bfc0c0" font-size="12" class="sans" text-anchor="middle">11,172자</text>
+<rect x="208" y="392" width="132" height="72" rx="6" fill="#0d1117"/>
+<rect x="208" y="392" width="132" height="72" rx="6" fill="#f5f5f5" fill-opacity="0.03" stroke="#f5f5f5" stroke-opacity="0.3" stroke-width="1"/>
+<text x="274" y="416" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">CJK Ext B+</text>
+<text x="274" y="436" fill="#bfc0c0" font-size="12" class="mono" text-anchor="middle">U+20000–</text>
+<text x="274" y="454" fill="#bfc0c0" font-size="12" class="mono" text-anchor="middle">lead F0</text>
+<rect x="351" y="392" width="132" height="72" rx="6" fill="#0d1117"/>
+<rect x="351" y="392" width="132" height="72" rx="6" fill="#f5f5f5" fill-opacity="0.03" stroke="#f5f5f5" stroke-opacity="0.3" stroke-width="1"/>
+<text x="417" y="432" fill="#f5f5f5" font-size="12" class="sans" text-anchor="middle" font-weight="600">Emoji</text>
+<text x="480" y="520" fill="#f5f5f5" font-size="16" class="sans" text-anchor="middle">한글 음절과 상용 한자는 둘 다 3바이트다. 다른 것은 첫 바이트(lead byte)뿐이다.</text>
+</svg>
+
+  </div>
+</body>
+</html>
