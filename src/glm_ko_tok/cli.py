@@ -9,6 +9,7 @@ from glm_ko_tok.coverage import compute_coverage
 from glm_ko_tok.fetch import DEFAULT_REPO, fetch_tokenizer
 from glm_ko_tok.loader import DEFAULT_DIR, TokenizerNotFoundError, load_tokenizer
 from glm_ko_tok.split import Analysis, analyze_text
+from glm_ko_tok.stream_sim import StreamReport, simulate_stream
 from glm_ko_tok.textio import read_cases, shorten, write, write_err
 
 
@@ -37,6 +38,9 @@ def build_parser() -> argparse.ArgumentParser:
     _add_input_args(p)
     p.add_argument('--json', action='store_true')
 
+    p = sub.add_parser('stream-sim', help='simulate streaming decode')
+    _add_input_args(p)
+    p.add_argument('--json', action='store_true')
     return parser
 
 
@@ -86,6 +90,50 @@ def _cmd_analyze(args: argparse.Namespace) -> int:
     return 0
 
 
+def _stream_table(rows: list[StreamReport]) -> str:
+    head = (
+        f'{"#":>3} {"naive":>6} {"incr":>5} {"dstream":>7} {"naive=":>6} {"incr=":>5} '
+        f'{"dstr=":>5}  text'
+    )
+    lines = [head]
+    totals = [0, 0, 0]
+    eq = [0, 0, 0]
+    for i, rep in enumerate(rows, 1):
+        r = rep.results
+        ds_ok = not r[2].skipped
+        for k in range(3):
+            totals[k] += r[k].fffd_count
+            eq[k] += int(r[k].equals_truth)
+        dsf = r[2].fffd_count if ds_ok else '-'
+        lines.append(
+            f'{i:>3} {r[0].fffd_count:>6} {r[1].fffd_count:>5} {dsf:>7} '
+            f'{int(r[0].equals_truth):>6} {int(r[1].equals_truth):>5} '
+            f'{int(r[2].equals_truth) if ds_ok else "-":>5}  {shorten(rep.text)}'
+        )
+    n = len(rows)
+    lines.append(
+        f'{"TOTAL":>3} {totals[0]:>6} {totals[1]:>5} {totals[2]:>7} '
+        f'{eq[0]}/{n:<4} {eq[1]}/{n:<3} {eq[2]}/{n}'
+    )
+    return '\n'.join(lines)
+
+
+def _cmd_stream_sim(args: argparse.Namespace) -> int:
+    inputs = collect_inputs(args)
+    if inputs is None:
+        write_err('stream-sim: give TEXT or --file PATH')
+        return 2
+    tk = load_tokenizer(args.dir)
+    reports = [simulate_stream(tk, t) for t in inputs]
+    if args.per_line:
+        write(_stream_table(reports))
+    elif args.json:
+        write(reports[0].to_json())
+    else:
+        write(reports[0].format())
+    return 0
+
+
 def _dispatch(args: argparse.Namespace) -> int:
     if args.command == 'fetch':
         for path in fetch_tokenizer(args.repo, args.dir):
@@ -97,6 +145,8 @@ def _dispatch(args: argparse.Namespace) -> int:
         return 0
     if args.command == 'analyze':
         return _cmd_analyze(args)
+    if args.command == 'stream-sim':
+        return _cmd_stream_sim(args)
     msg = f'unknown command: {args.command}'
     raise SystemExit(msg)
 

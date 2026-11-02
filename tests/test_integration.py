@@ -24,3 +24,14 @@ def test_coverage_real_matches_measured_facts(real_tk):
     assert result.ks.total == 2350
     assert result.ks.single == 263
     assert result.all.single == 263
+
+
+def test_incremental_equals_original_on_real(real_tk):
+    from glm_ko_tok.stream_sim import simulate_stream
+
+    report = simulate_stream(real_tk, '안녕하세요')
+    by = {r.name: r for r in report.results}
+    assert '�' in by['naive'].output
+    assert by['incremental'].output == '안녕하세요'
+    assert not by['decode_stream'].skipped
+    assert by['decode_stream'].equals_truth
