@@ -4,6 +4,8 @@ CLI to find out why Korean text shows broken characters (U+FFFD) when streaming 
 GLM-5.3 uses a byte-level BPE tokenizer. Most Hangul syllables are 3 UTF-8 bytes and are
 split across several tokens. A client that decodes each token alone prints U+FFFD.
 
+Analysis (Korean, with diagrams): [docs/hangul-vs-han-tokenization.md](docs/hangul-vs-han-tokenization.md).
+
 ## Install
 
 ```bash

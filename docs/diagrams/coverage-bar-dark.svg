@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 480" width="840" height="480" role="img" aria-labelledby="coverage-bar-dark-title coverage-bar-dark-desc">
+  <title id="coverage-bar-dark-title">글자 하나가 토큰 하나인 비율 (GLM-5.3)</title>
+  <desc id="coverage-bar-dark-desc">Bar chart of the share of characters that are a single token in GLM-5.3: Chinese GB2312 level 1 is 92.8 percent, common Hangul is 11.2 percent.</desc>
+  <style>
+    .sans { font-family: 'Geist', 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Noto Sans CJK KR', 'Malgun Gothic', sans-serif; }
+    .mono { font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Noto Sans Mono CJK KR', monospace; }
+    .serif { font-family: 'Instrument Serif', 'Noto Serif KR', serif; }
+  </style>
+  <rect width="100%" height="100%" fill="#0d1117"/>
+  <text x="24" y="40" class="sans" font-size="24" font-weight="600" fill="#f5f5f5" text-anchor="start" >글자 하나가 토큰 하나인 비율: 한글 11.2%, 중국어 92.8%</text>
+  <text x="24" y="64" class="sans" font-size="12" font-weight="400" fill="#bfc0c0" text-anchor="start" >GLM-5.3에서 단일 토큰인 글자의 비율 (%)</text>
+  <line x1="288" y1="100" x2="288" y2="420" stroke="rgba(245,245,245,0.10)" stroke-width="0.8"/>
+  <text x="288" y="92" class="mono" font-size="12" font-weight="400" fill="#9a9fa8" text-anchor="middle" >0%</text>
+  <line x1="388" y1="100" x2="388" y2="420" stroke="rgba(245,245,245,0.10)" stroke-width="0.8"/>
+  <text x="388" y="92" class="mono" font-size="12" font-weight="400" fill="#9a9fa8" text-anchor="middle" >25%</text>
+  <line x1="488" y1="100" x2="488" y2="420" stroke="rgba(245,245,245,0.10)" stroke-width="0.8"/>
+  <text x="488" y="92" class="mono" font-size="12" font-weight="400" fill="#9a9fa8" text-anchor="middle" >50%</text>
+  <line x1="588" y1="100" x2="588" y2="420" stroke="rgba(245,245,245,0.10)" stroke-width="0.8"/>
+  <text x="588" y="92" class="mono" font-size="12" font-weight="400" fill="#9a9fa8" text-anchor="middle" >75%</text>
+  <line x1="688" y1="100" x2="688" y2="420" stroke="rgba(245,245,245,0.10)" stroke-width="0.8"/>
+  <text x="688" y="92" class="mono" font-size="12" font-weight="400" fill="#9a9fa8" text-anchor="middle" >100%</text>
+  <line x1="288" y1="100" x2="288" y2="420" stroke="#9a9fa8" stroke-width="1"/>
+  <text x="24" y="120" class="sans" font-size="12" font-weight="600" fill="#bfc0c0" text-anchor="start" >한글</text>
+  <line x1="24" y1="128" x2="816" y2="128" stroke="rgba(245,245,245,0.14)" stroke-width="0.8"/>
+  <text x="276" y="159" class="sans" font-size="12" font-weight="600" fill="#f5f5f5" text-anchor="end" >한글 상용 2,350자</text>
+  <rect x="288" y="140" width="44.8" height="28" fill="rgba(240,138,89,0.16)" stroke="#f08a59" stroke-width="1"/>
+  <text x="340.8" y="159" class="mono" font-size="12" fill="#f08a59"><tspan font-weight="600" fill="#f08a59">11.2%</tspan><tspan fill="#9a9fa8"> 263/2,350</tspan></text>
+  <text x="276" y="203" class="sans" font-size="12" font-weight="400" fill="#f5f5f5" text-anchor="end" >한글 전체 11,172자</text>
+  <rect x="288" y="184" width="9.6" height="28" fill="rgba(191,192,192,0.16)" stroke="#bfc0c0" stroke-width="1"/>
+  <text x="305.6" y="203" class="mono" font-size="12" fill="#bfc0c0"><tspan font-weight="600" fill="#f5f5f5">2.4%</tspan><tspan fill="#9a9fa8"> 263/11,172</tspan></text>
+  <text x="276" y="247" class="sans" font-size="12" font-weight="400" fill="#f5f5f5" text-anchor="end" >한글 호환 자모 51자</text>
+  <line x1="288" y1="228" x2="288" y2="256" stroke="#bfc0c0" stroke-width="2"/>
+  <text x="296.0" y="247" class="mono" font-size="12" fill="#bfc0c0"><tspan font-weight="600" fill="#f5f5f5">0.0%</tspan><tspan fill="#9a9fa8"> 0/51</tspan></text>
+  <text x="24" y="284" class="sans" font-size="12" font-weight="600" fill="#bfc0c0" text-anchor="start" >한자 · 중국어</text>
+  <line x1="24" y1="292" x2="816" y2="292" stroke="rgba(245,245,245,0.14)" stroke-width="0.8"/>
+  <text x="276" y="323" class="sans" font-size="12" font-weight="600" fill="#f5f5f5" text-anchor="end" >중국어 GB2312 1급 3,755자</text>
+  <rect x="288" y="304" width="371.2" height="28" fill="rgba(240,138,89,0.16)" stroke="#f08a59" stroke-width="1"/>
+  <text x="667.2" y="323" class="mono" font-size="12" fill="#f08a59"><tspan font-weight="600" fill="#f08a59">92.8%</tspan><tspan fill="#9a9fa8"> 3,483/3,755</tspan></text>
+  <text x="276" y="367" class="sans" font-size="12" font-weight="400" fill="#f5f5f5" text-anchor="end" >한자 KS X 1001 4,888자</text>
+  <rect x="288" y="348" width="196.4" height="28" fill="rgba(245,245,245,0.14)" stroke="#f5f5f5" stroke-width="1"/>
+  <text x="492.4" y="367" class="mono" font-size="12" fill="#bfc0c0"><tspan font-weight="600" fill="#f5f5f5">49.1%</tspan><tspan fill="#9a9fa8"> 2,400/4,888</tspan></text>
+  <text x="276" y="411" class="sans" font-size="12" font-weight="400" fill="#f5f5f5" text-anchor="end" >CJK 통합 한자 20,992자</text>
+  <rect x="288" y="392" width="80.4" height="28" fill="rgba(245,245,245,0.14)" stroke="#f5f5f5" stroke-width="1"/>
+  <text x="376.4" y="411" class="mono" font-size="12" fill="#bfc0c0"><tspan font-weight="600" fill="#f5f5f5">20.1%</tspan><tspan fill="#9a9fa8"> 4,216/20,992</tspan></text>
+  <line x1="24" y1="436" x2="816" y2="436" stroke="rgba(245,245,245,0.14)" stroke-width="0.8"/>
+  <text x="24" y="460" class="mono" font-size="12" font-weight="400" fill="#9a9fa8" text-anchor="start" >Source: zai-org/GLM-5.3 tokenizer.json, 2026-11-03, `glm-ko-tok compare`</text>
+</svg>

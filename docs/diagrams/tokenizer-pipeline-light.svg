@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="464" viewBox="0 0 960 464" role="img" aria-labelledby="tokenizer-pipeline-light-title tokenizer-pipeline-light-desc">
+<title id="tokenizer-pipeline-light-title">GLM-5.3 토크나이저 처리 순서</title>
+<desc id="tokenizer-pipeline-light-desc">입력 '안녕 你好'가 정규식 분할, UTF-8 변환, ByteLevel 매핑, BPE 병합, 토큰 ID 순서로 처리된다. 한글이 불리해지는 단계는 BPE 병합 하나다.</desc>
+<defs>
+<style>
+.sans { font-family: 'Geist', 'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Noto Sans CJK KR', 'Malgun Gothic', sans-serif; }
+.mono { font-family: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Noto Sans Mono CJK KR', monospace; }
+.serif { font-family: 'Instrument Serif', 'Noto Serif KR', serif; }
+</style>
+<marker id="tokenizer-pipeline-light-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+<marker id="tokenizer-pipeline-light-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+</defs>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<path d="M184 104 H224" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#tokenizer-pipeline-light-arrow)"/>
+<path d="M368 104 H408" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#tokenizer-pipeline-light-arrow)"/>
+<path d="M552 104 H592" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#tokenizer-pipeline-light-arrow-accent)"/>
+<path d="M736 104 H776" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#tokenizer-pipeline-light-arrow-accent)"/>
+<path d="M112 152 V200" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#tokenizer-pipeline-light-arrow)"/>
+<path d="M296 152 V200" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#tokenizer-pipeline-light-arrow)"/>
+<path d="M480 152 V200" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#tokenizer-pipeline-light-arrow)"/>
+<path d="M664 152 V200" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#tokenizer-pipeline-light-arrow)"/>
+<path d="M848 152 V200" fill="none" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#tokenizer-pipeline-light-arrow)"/>
+<rect x="40" y="56" width="144" height="96" rx="6" fill="#ffffff"/>
+<rect x="40" y="56" width="144" height="96" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="52" y="76" fill="#7a8399" font-size="8" class="mono" letter-spacing="0.14em">STEP 1</text>
+<text x="52" y="96" fill="#2d3142" font-size="12" class="sans" font-weight="600">정규식 분할</text>
+<text x="52" y="116" fill="#4f5d75" font-size="12" class="mono">\p{L}+</text>
+<text x="52" y="138" fill="#4f5d75" font-size="12" class="sans">차이 없음</text>
+<rect x="40" y="200" width="144" height="176" rx="6" fill="#ffffff"/>
+<rect x="40" y="200" width="144" height="176" rx="6" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-opacity="1" stroke-width="1"/>
+<rect x="224" y="56" width="144" height="96" rx="6" fill="#ffffff"/>
+<rect x="224" y="56" width="144" height="96" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="236" y="76" fill="#7a8399" font-size="8" class="mono" letter-spacing="0.14em">STEP 2</text>
+<text x="236" y="96" fill="#2d3142" font-size="12" class="sans" font-weight="600">바이트 변환</text>
+<text x="236" y="116" fill="#4f5d75" font-size="12" class="mono">UTF-8</text>
+<text x="236" y="138" fill="#4f5d75" font-size="12" class="sans">차이 없음</text>
+<rect x="224" y="200" width="144" height="176" rx="6" fill="#ffffff"/>
+<rect x="224" y="200" width="144" height="176" rx="6" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-opacity="1" stroke-width="1"/>
+<rect x="408" y="56" width="144" height="96" rx="6" fill="#ffffff"/>
+<rect x="408" y="56" width="144" height="96" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="420" y="76" fill="#7a8399" font-size="8" class="mono" letter-spacing="0.14em">STEP 3</text>
+<text x="420" y="96" fill="#2d3142" font-size="12" class="sans" font-weight="600">ByteLevel 매핑</text>
+<text x="420" y="116" fill="#4f5d75" font-size="12" class="mono">GPT-2 table</text>
+<text x="420" y="138" fill="#4f5d75" font-size="12" class="sans">차이 없음</text>
+<rect x="408" y="200" width="144" height="176" rx="6" fill="#ffffff"/>
+<rect x="408" y="200" width="144" height="176" rx="6" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-opacity="1" stroke-width="1"/>
+<rect x="592" y="56" width="144" height="96" rx="6" fill="#ffffff"/>
+<rect x="592" y="56" width="144" height="96" rx="6" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-opacity="1" stroke-width="1"/>
+<text x="604" y="76" fill="#eb6c36" font-size="8" class="mono" letter-spacing="0.14em">STEP 4</text>
+<text x="604" y="96" fill="#2d3142" font-size="12" class="sans" font-weight="600">BPE 병합</text>
+<text x="604" y="116" fill="#4f5d75" font-size="12" class="mono">merges</text>
+<text x="604" y="138" fill="#eb6c36" font-size="12" class="sans" font-weight="600">한글이 불리함</text>
+<rect x="592" y="200" width="144" height="176" rx="6" fill="#ffffff"/>
+<rect x="592" y="200" width="144" height="176" rx="6" fill="#eb6c36" fill-opacity="0.08" stroke="#eb6c36" stroke-opacity="1" stroke-width="1"/>
+<rect x="776" y="56" width="144" height="96" rx="6" fill="#ffffff"/>
+<rect x="776" y="56" width="144" height="96" rx="6" fill="#ffffff" fill-opacity="1" stroke="#2d3142" stroke-opacity="1" stroke-width="1"/>
+<text x="788" y="76" fill="#7a8399" font-size="8" class="mono" letter-spacing="0.14em">STEP 5</text>
+<text x="788" y="96" fill="#2d3142" font-size="12" class="sans" font-weight="600">토큰 ID</text>
+<text x="788" y="116" fill="#4f5d75" font-size="12" class="mono">vocab</text>
+<text x="788" y="138" fill="#4f5d75" font-size="12" class="sans">한글은 조각 토큰</text>
+<rect x="776" y="200" width="144" height="176" rx="6" fill="#ffffff"/>
+<rect x="776" y="200" width="144" height="176" rx="6" fill="#2d3142" fill-opacity="0.05" stroke="#4f5d75" stroke-opacity="1" stroke-width="1"/>
+<text x="52" y="228" fill="#2d3142" font-size="12" class="mono">입력 안녕 你好</text>
+<text x="52" y="250" fill="#2d3142" font-size="12" class="mono">→ '안녕'</text>
+<text x="52" y="272" fill="#2d3142" font-size="12" class="mono">→ ' 你好'</text>
+<text x="236" y="228" fill="#2d3142" font-size="12" class="mono">안 EC 95 88</text>
+<text x="236" y="250" fill="#2d3142" font-size="12" class="mono">녕 EB 85 95</text>
+<text x="236" y="272" fill="#2d3142" font-size="12" class="mono">␣ 20</text>
+<text x="236" y="294" fill="#2d3142" font-size="12" class="mono">你 E4 BD A0</text>
+<text x="236" y="316" fill="#2d3142" font-size="12" class="mono">好 E5 A5 BD</text>
+<text x="420" y="228" fill="#2d3142" font-size="12" class="mono">byte → char</text>
+<text x="420" y="250" fill="#2d3142" font-size="12" class="mono">(1 : 1)</text>
+<text x="420" y="272" fill="#2d3142" font-size="12" class="mono">GPT-2 표</text>
+<text x="604" y="228" fill="#2d3142" font-size="12" class="sans">빈도순 병합</text>
+<text x="604" y="262" fill="#4f5d75" font-size="12" class="sans">한자 포함 토큰</text>
+<text x="604" y="282" fill="#2d3142" font-size="12" class="mono" font-weight="600">28,642</text>
+<rect x="604" y="290" width="120" height="8" rx="2" fill="#4f5d75"/>
+<text x="604" y="328" fill="#4f5d75" font-size="12" class="sans">한글 포함 토큰</text>
+<text x="604" y="348" fill="#eb6c36" font-size="12" class="mono" font-weight="600">565</text>
+<rect x="604" y="356" width="2.4" height="8" rx="1" fill="#eb6c36"/>
+<text x="788" y="228" fill="#2d3142" font-size="12" class="mono">안 133420</text>
+<text x="788" y="250" fill="#2d3142" font-size="12" class="mono">EB 85 73588 �</text>
+<text x="788" y="272" fill="#2d3142" font-size="12" class="mono">95 243 �</text>
+<text x="788" y="294" fill="#2d3142" font-size="12" class="mono">你好 109377</text>
+<text x="480" y="424" fill="#2d3142" font-size="16" class="sans" text-anchor="middle">한글이 불리해지는 곳은 4단계 하나다. 나머지는 한글과 한자를 똑같이 다룬다.</text>
+</svg>
