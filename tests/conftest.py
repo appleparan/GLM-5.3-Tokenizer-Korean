@@ -5,7 +5,15 @@ from pathlib import Path
 
 import pytest
 
-from glm_ko_tok.loader import DEFAULT_ROOT, LEGACY_DIR, TokenizerNotFoundError, load_model
+from glm_ko_tok.loader import (
+    DEFAULT_ROOT,
+    LEGACY_DIR,
+    LoadedModel,
+    TokenizerNotFoundError,
+    load_model,
+)
+from glm_ko_tok.sample_stats import read_parallel_pairs
+from glm_ko_tok.textio import read_cases
 
 ROOT = Path(__file__).resolve().parent.parent
 SAMPLES = ROOT / 'samples'
@@ -52,15 +60,29 @@ def fake_tk() -> FakeTokenizer:
     return FakeTokenizer(['국'.encode(), b'\x95\x9c', b'ab'])
 
 
-def real_model(key: str):
-    """Load a real downloaded model, or skip when its files are absent."""
-    try:
-        return load_model(key, ROOT / DEFAULT_ROOT, ROOT / LEGACY_DIR)
-    except TokenizerNotFoundError:
-        pytest.skip(f'{key} tokenizer not downloaded')
+@pytest.fixture(scope='session')
+def load_real():
+    """Return a loader for a real downloaded model; the test is skipped when files are absent."""
+
+    def _load(key: str) -> LoadedModel:
+        try:
+            return load_model(key, ROOT / DEFAULT_ROOT, ROOT / LEGACY_DIR)
+        except TokenizerNotFoundError:
+            pytest.skip(f'{key} tokenizer not downloaded')
+
+    return _load
 
 
 @pytest.fixture(scope='session')
-def real_tk():
+def sample_lines() -> list[str]:
+    """Every line of samples/korean.txt and both sides of samples/parallel_ko_zh.txt."""
+    lines = read_cases(SAMPLES / 'korean.txt')
+    for ko, zh in read_parallel_pairs(SAMPLES / 'parallel_ko_zh.txt'):
+        lines.extend([ko, zh])
+    return lines
+
+
+@pytest.fixture(scope='session')
+def real_tk(load_real):
     """Real GLM-5.3 backend, or skip when not downloaded."""
-    return real_model('glm-5.3').backend
+    return load_real('glm-5.3').backend
